@@ -1,5 +1,5 @@
 import { EtherscanTransaction,TransactionTableData,TransactionType,EtherscanBalance,WalletBalance } from "@/types/api";
-import { GraphData, Node, Link } from "@/types/graph";
+import { GraphData, Node, Link, ForceGraphNode } from "@/types/graph";
 
   const CONFIG = {
     MAX_TRANSACTIONS: 200,
@@ -72,7 +72,9 @@ import { GraphData, Node, Link } from "@/types/graph";
       isCenter: true,
       totalTransactions: 0,
       totalReceived: 0,
-      totalSent: 0
+      totalSent: 0,
+      x: 0,
+      y: 0
     });
   
     // Process transactions
@@ -92,7 +94,9 @@ import { GraphData, Node, Link } from "@/types/graph";
           isCenter: false,
           totalTransactions: 0,
           totalReceived: 0,
-          totalSent: 0
+          totalSent: 0,
+          x: 0,
+          y: 0
         });
       }
   
@@ -103,7 +107,9 @@ import { GraphData, Node, Link } from "@/types/graph";
           isCenter: false,
           totalTransactions: 0,
           totalReceived: 0,
-          totalSent: 0
+          totalSent: 0,
+          x: 0,
+          y: 0
         });
       }
   
@@ -147,7 +153,7 @@ import { GraphData, Node, Link } from "@/types/graph";
     // });
   
     return {
-      nodes: nodeArray,
+      nodes: nodeArray as ForceGraphNode[],
       links: linkArray,
       metadata: {
         dataSource: 'etherscan' as const,

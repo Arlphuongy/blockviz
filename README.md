@@ -1,9 +1,26 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
-
-First, run the development server:
-
+First, start install all the necessary libaries and dependencies:
+```bash
+npm install
+# or 
+yarn install
+# or 
+pnpm install
+# or 
+bunn install
+```
+After that input the necessary CONST in .env:
+```bash
+# Etherscan API Key
+ETHERSCAN_API_KEY
+#Neo4J Aura DB
+NEO4J_URI
+NEO4J_USER
+NEO4J_PASSWORD
+```
+Then, run the development server:
 ```bash
 npm run dev
 # or

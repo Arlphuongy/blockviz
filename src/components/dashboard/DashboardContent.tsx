@@ -6,15 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Graph } from "@/components/dashboard/Graph";
-import type { Node, GraphData, Link } from "@/types/graph";
+import type { Node, GraphData } from "@/types/graph";
 import { TransactionTableData, WalletBalance } from "@/types/api";
 import { TransactionTable } from "@/components/dashboard/TransactionTable";
 import { WalletBalanceCards } from "@/components/dashboard/WalletDetails";
 
-//constants
-const GRAPH_CONFIG = {
-  LINK_CURVATURE: 0.1,
-} as const;
 
 interface DashboardContentProps {
   currentAddress?: string;
