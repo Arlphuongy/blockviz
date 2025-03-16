@@ -39,8 +39,8 @@ const DashboardContent = ({ currentAddress }: DashboardContentProps) => {
       setError(null);
       
       const [transactionResponse, balanceResponse] = await Promise.all([
-        fetch(`/api/dashboard/${walletAddress}/transactions`),
-        fetch(`/api/dashboard/${walletAddress}/balance`)
+        fetch(`/api/addresses/${walletAddress}/transactions`),
+        fetch(`/api/addresses/${walletAddress}/balance`)
       ]);
       
       if (!transactionResponse.ok) {

@@ -20,7 +20,11 @@ interface UploadStatus {
 export default function AdminUploadPage() {
   const [nodesFile, setNodesFile] = useState<File | null>(null);
   const [relationshipsFile, setRelationshipsFile] = useState<File | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
+  const [nodesUploadStatus, setNodesUploadStatus] = useState<UploadStatus>({
+    isUploading: false,
+    progress: 0
+  });
+  const [relationshipsUploadStatus, setRelationshipsUploadStatus] = useState<UploadStatus>({
     isUploading: false,
     progress: 0
   });
@@ -33,24 +37,23 @@ export default function AdminUploadPage() {
     }
   };
 
-  const handleUpload = async () => {
-    if (!nodesFile || !relationshipsFile) {
-      setUploadStatus({
+  const handleNodesUpload = async () => {
+    if (!nodesFile) {
+      setNodesUploadStatus({
         isUploading: false,
         progress: 0,
-        error: "Please select both files"
+        error: "Please select nodes file"
       });
       return;
     }
 
-    setUploadStatus({ isUploading: true, progress: 0 });
+    setNodesUploadStatus({ isUploading: true, progress: 0 });
 
     try {
       const formData = new FormData();
       formData.append('nodes', nodesFile);
-      formData.append('relationships', relationshipsFile);
 
-      const response = await fetch('/api/admin/upload', {
+      const response = await fetch('/api/addresses', {
         method: 'POST',
         body: formData,
       });
@@ -59,13 +62,52 @@ export default function AdminUploadPage() {
 
       if (!response.ok) throw new Error(data.error);
 
-      setUploadStatus({
+      setNodesUploadStatus({
         isUploading: false,
         progress: 100,
-        success: "Files uploaded and processed successfully"
+        success: "Nodes file uploaded and processed successfully"
       });
     } catch (error) {
-      setUploadStatus({
+      setNodesUploadStatus({
+        isUploading: false,
+        progress: 0,
+        error: error instanceof Error ? error.message : "Upload failed"
+      });
+    }
+  };
+
+  const handleRelationshipsUpload = async () => {
+    if (!relationshipsFile) {
+      setRelationshipsUploadStatus({
+        isUploading: false,
+        progress: 0,
+        error: "Please select relationships file"
+      });
+      return;
+    }
+
+    setRelationshipsUploadStatus({ isUploading: true, progress: 0 });
+
+    try {
+      const formData = new FormData();
+      formData.append('relationships', relationshipsFile);
+
+      const response = await fetch('/api/transactions', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error);
+
+      setRelationshipsUploadStatus({
+        isUploading: false,
+        progress: 100,
+        success: "Relationships file uploaded and processed successfully"
+      });
+    } catch (error) {
+      setRelationshipsUploadStatus({
         isUploading: false,
         progress: 0,
         error: error instanceof Error ? error.message : "Upload failed"
@@ -107,6 +149,35 @@ export default function AdminUploadPage() {
                     Selected: {nodesFile.name}
                   </p>
                 )}
+                {nodesUploadStatus.error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{nodesUploadStatus.error}</AlertDescription>
+                  </Alert>
+                )}
+                {nodesUploadStatus.success && (
+                  <Alert variant="default">
+                    <CheckCircle className="h-4 w-4" />
+                    <AlertTitle>Success</AlertTitle>
+                    <AlertDescription>{nodesUploadStatus.success}</AlertDescription>
+                  </Alert>
+                )}
+                {nodesUploadStatus.isUploading && (
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div
+                      className="bg-blue-600 h-2.5 rounded-full"
+                      style={{ width: `${nodesUploadStatus.progress}%` }}
+                    ></div>
+                  </div>
+                )}
+                <Button
+                  onClick={handleNodesUpload}
+                  disabled={nodesUploadStatus.isUploading || !nodesFile}
+                  className="w-full"
+                >
+                  {nodesUploadStatus.isUploading ? "Uploading Nodes..." : "Upload Nodes"}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -138,45 +209,38 @@ export default function AdminUploadPage() {
                     Selected: {relationshipsFile.name}
                   </p>
                 )}
+                {relationshipsUploadStatus.error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{relationshipsUploadStatus.error}</AlertDescription>
+                  </Alert>
+                )}
+                {relationshipsUploadStatus.success && (
+                  <Alert variant="default">
+                    <CheckCircle className="h-4 w-4" />
+                    <AlertTitle>Success</AlertTitle>
+                    <AlertDescription>{relationshipsUploadStatus.success}</AlertDescription>
+                  </Alert>
+                )}
+                {relationshipsUploadStatus.isUploading && (
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div
+                      className="bg-blue-600 h-2.5 rounded-full"
+                      style={{ width: `${relationshipsUploadStatus.progress}%` }}
+                    ></div>
+                  </div>
+                )}
+                <Button
+                  onClick={handleRelationshipsUpload}
+                  disabled={relationshipsUploadStatus.isUploading || !relationshipsFile}
+                  className="w-full"
+                >
+                  {relationshipsUploadStatus.isUploading ? "Uploading Relationships..." : "Upload Relationships"}
+                </Button>
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Status and Actions */}
-        <div className="space-y-4">
-          {uploadStatus.error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{uploadStatus.error}</AlertDescription>
-            </Alert>
-          )}
-
-          {uploadStatus.success && (
-            <Alert variant="default">
-              <CheckCircle className="h-4 w-4" />
-              <AlertTitle>Success</AlertTitle>
-              <AlertDescription>{uploadStatus.success}</AlertDescription>
-            </Alert>
-          )}
-
-          {uploadStatus.isUploading && (
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div
-                className="bg-blue-600 h-2.5 rounded-full"
-                style={{ width: `${uploadStatus.progress}%` }}
-              ></div>
-            </div>
-          )}
-
-          <Button
-            onClick={handleUpload}
-            disabled={uploadStatus.isUploading || !nodesFile || !relationshipsFile}
-            className="w-full"
-          >
-            {uploadStatus.isUploading ? "Uploading..." : "Upload Files"}
-          </Button>
         </div>
       </div>
     </div>

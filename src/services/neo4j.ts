@@ -240,7 +240,7 @@ export class Neo4jService {
             type: row.type.toLowerCase() as 'eoa' | 'contract'
           };
 
-          // Execute the Cypher query and get the result
+          // Execute the Cypher query to merge and update node
           const result = await session.run(`
             MERGE (n:Address {address: $addressId})
             SET n.type = $type
@@ -267,7 +267,7 @@ export class Neo4jService {
       // Final statistics
       console.log('\nUpload Summary:');
       console.log(`Total rows processed: ${totalRows}`);
-      console.log(`Successfully uploaded: ${processedRows}`);
+      console.log(`Successfully uploaded/updated: ${processedRows}`);
       console.log(`Failed rows: ${failedRows}`);
       
       if (failedEntries.length > 0) {
@@ -296,25 +296,22 @@ export class Neo4jService {
     let processedRows = 0;
     let failedRows = 0;
     const failedEntries: Array<{row: number, error: string}> = [];
-
+  
     try {
       console.log(`Starting to upload relationships from file: ${file.filename}`);
       
       const stream = createReadStream(file.path)
         .pipe(parse({ columns: true, skip_empty_lines: true }));
-
+  
       for await (const row of stream) {
         totalRows++;
         try {
-          // Log the raw row data for debugging
-          // console.log(`Processing relationship row ${totalRows}:`, row);
-
           // Check required fields
           const requiredFields = [
             'from_address', 'to_address', 'hash', 'value',
             'gas', 'gas_used', 'gas_price', 'block_number'
           ];
-
+  
           const missingFields = requiredFields.filter(field => !row[field]);
           if (missingFields.length > 0) {
             failedRows++;
@@ -324,7 +321,7 @@ export class Neo4jService {
             });
             continue;
           }
-
+  
           const relationshipData: RelationshipData = {
             from_address: row.from_address.toLowerCase(),
             to_address: row.to_address.toLowerCase(),
@@ -340,30 +337,16 @@ export class Neo4jService {
             block_hash: row.block_hash || '',
             block_timestamp: parseInt(row.block_timestamp) || 0
           };
-
-          // First, verify that both nodes exist
-          const nodesExist = await session.run(`
-            MATCH (from:Address {address: $from_address})
-            MATCH (to:Address {address: $to_address})
-            RETURN count(*) as count
-          `, {
-            from_address: relationshipData.from_address,
-            to_address: relationshipData.to_address
-          });
-
-          if (nodesExist.records[0].get('count').toNumber() === 0) {
-            failedRows++;
-            failedEntries.push({
-              row: totalRows,
-              error: `One or both addresses not found in database: ${relationshipData.from_address} -> ${relationshipData.to_address}`
-            });
-            continue;
-          }
-
-          // Create the relationship
+  
+          // Create or match nodes and create relationship in a single transaction
           const result = await session.run(`
-            MATCH (from:Address {address: $from_address})
-            MATCH (to:Address {address: $to_address})
+            // Match or create nodes with default type 'eoa'
+            MERGE (from:Address {address: $from_address})
+            ON CREATE SET from.type = 'eoa'
+            MERGE (to:Address {address: $to_address})
+            ON CREATE SET to.type = 'eoa'
+            
+            // Create the relationship
             MERGE (from)-[r:TRANSFERRED {hash: $hash}]->(to)
             SET r += $properties
             RETURN r
@@ -382,14 +365,14 @@ export class Neo4jService {
               block_timestamp: relationshipData.block_timestamp
             }
           });
-
+  
           if (result.records.length > 0) {
             processedRows++;
             if (processedRows % 50 === 0) {
               console.log(`Processed ${processedRows} relationships so far...`);
             }
           }
-
+  
         } catch (error) {
           failedRows++;
           failedEntries.push({
@@ -399,25 +382,25 @@ export class Neo4jService {
           console.error(`Error processing relationship row ${totalRows}:`, error);
         }
       }
-
+  
       // Final statistics
       console.log('\nRelationships Upload Summary:');
       console.log(`Total rows processed: ${totalRows}`);
       console.log(`Successfully uploaded: ${processedRows}`);
-      console.log(`Failed rows: ${failedRows}`);
+      console.log(`Failed/Skipped rows: ${failedRows}`);
       
       if (failedEntries.length > 0) {
-        console.log('\nFailed entries:');
+        console.log('\nFailed/Skipped entries:');
         failedEntries.forEach(entry => {
           console.log(`Row ${entry.row}: ${entry.error}`);
         });
       }
-
+  
       // Verify the total number of relationships in the database
       const countResult = await session.run('MATCH ()-[r:TRANSFERRED]->() RETURN count(r) as count');
       const totalRelsInDb = countResult.records[0].get('count').toNumber();
       console.log(`\nTotal relationships in database: ${totalRelsInDb}`);
-
+  
     } catch (error) {
       console.error('Fatal error during relationships upload:', error);
       throw error;
