@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Target, Heart } from "lucide-react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-[#1a1625]">

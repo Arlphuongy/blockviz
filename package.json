@@ -11,14 +11,19 @@
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-popover": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@supabase/supabase-js": "^2.49.1",
+    "@types/csv-parse": "^1.1.12",
     "aframe-extras": "^7.5.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "1.0.0",
+    "csv-parse": "^5.6.0",
     "force-graph": "^1.49.2",
     "framer-motion": "^12.4.0",
     "lucide-react": "^0.474.0",
+    "neo4j-driver": "^5.28.1",
     "next": "15.1.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -29,7 +34,8 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.173.0",
     "tsparticles": "^3.8.1",
-    "tsparticles-engine": "^2.12.0"
+    "tsparticles-engine": "^2.12.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

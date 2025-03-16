@@ -5,9 +5,9 @@ import { Input } from "@/components/ui/input";
 import { ArrowRight, BarChart2, Search, Wallet } from "lucide-react";
 import { useState, FormEvent, useEffect } from "react";
 import { motion } from "framer-motion";
-import Footer from "../components/Footer";
-import Navbar from "../components/Navbar";
-import WalletDetails from "../components/WalletDetails";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
+import WalletDetails from "@/components/dashboard/WalletDetails";
 
 export interface Transaction {
   hash: string;
