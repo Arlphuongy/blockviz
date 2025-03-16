@@ -1,3 +1,5 @@
+
+
 export interface Node {
     id: string;
     val: number;
@@ -8,7 +10,6 @@ export interface Node {
     totalReceived?: number;
     totalSent?: number;
   }
-  
   export interface ForceGraphNode extends Node {
     x: number;
     y: number;
@@ -18,6 +19,7 @@ export interface Node {
     __indexColor?: string;
     __bckgDimensions?: number[];
   }
+
   
   export interface Link {
     id: string;
@@ -32,9 +34,12 @@ export interface Node {
     functionName?: string;
   }
   
+  export interface ForceGraphLink extends Link {
+    curvature: number;
+  }
   export interface GraphData {
-    nodes: Node[];
-    links: Link[];
+    nodes: ForceGraphNode[];
+    links: ForceGraphLink[];
     metadata?: {
       dataSource: 'neo4j-cache' | 'etherscan';
       totalTransactions: number;
@@ -43,3 +48,4 @@ export interface Node {
       totalValue: number;
     };
   }
+  

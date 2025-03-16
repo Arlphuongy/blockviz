@@ -2,7 +2,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import { GraphData, Node, Link, ForceGraphNode, ForceGraphLink } from "@/types/graph";
 // dynamically importing forcegraph2d to prevent SSR issues
 const ForceGraph2D = dynamic(
   () => import('react-force-graph-2d'),
@@ -13,56 +13,6 @@ interface GraphProps {
   isLoading: boolean;
   centerNode: Node | null;
 }
-interface Node {
-  id: string;
-  val: number;
-  isCenter?: boolean;
-  x?: number;
-  y?: number;
-  totalTransactions?: number;
-  totalReceived?: number;
-  totalSent?: number;
-}
-
-interface ForceGraphNode extends Node {
-  x: number;
-  y: number;
-  index?: number;
-  vx?: number;
-  vy?: number;
-  __indexColor?: string;
-  __bckgDimensions?: number[];
-}
-
-interface Link {
-  id: string;
-  source: string | Node;
-  target: string | Node;
-  val: number;
-  hash: string;
-  timestamp: string;
-  gasPrice?: string;
-  gasUsed?: string;
-  methodId?: string;
-  functionName?: string;
-}
-
-interface ForceGraphLink extends Link {
-  curvature: number;
-}
-
-interface GraphData {
-  nodes: Node[];
-  links: Link[];
-  metadata?: {
-    dataSource: 'neo4j-cache' | 'etherscan';
-    totalTransactions: number;
-    uniqueAddresses: number;
-    centerAddress: string;
-    totalValue: number;
-  };
-}
-
 const GRAPH_CONFIG = {
   NODE_SIZE: 3,
   CENTER_NODE_VALUE: 4,
@@ -185,7 +135,7 @@ export const Graph = ({ graphData,isLoading, centerNode }: GraphProps) => {
       nodeVal={(node) => node.val || GRAPH_CONFIG.NORMAL_NODE_VALUE}
       nodeLabel={(node): string => String(node.id)}
       onNodeClick={(node) => handleNodeClick(node as ForceGraphNode)}
-      onLinkClick={(link) => handleLinkClick(link as Link)}
+      onLinkClick={(link) => handleLinkClick(link as ForceGraphLink)}
       backgroundColor={COLORS.BACKGROUND}
       nodeCanvasObject={(node, ctx, globalScale) => nodeCanvasObject(node as Node, ctx, globalScale)}
       cooldownTicks={100}

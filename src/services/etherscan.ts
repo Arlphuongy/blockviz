@@ -8,6 +8,7 @@ import { GraphData, Node, Link } from "@/types/graph";
       NORMAL: 2,
     },
     WEI_TO_ETH: 1e18,
+    CURVATURE: 0.05 
   } as const;
 
   export async function fetchEtherscanWalletBalance(
@@ -134,7 +135,10 @@ import { GraphData, Node, Link } from "@/types/graph";
     });
   
     const nodeArray = Array.from(nodes.values());
-    const linkArray = Array.from(linksMap.values());
+    const linkArray = Array.from(linksMap.values()).map((link, index, array) => ({
+      ...link,
+      curvature: (index - array.length/2) * CONFIG.CURVATURE
+    }));;
   
     // console.log('Transformation results:', {
     //   inputTransactions: transactions.length,
